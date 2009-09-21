@@ -61,6 +61,7 @@ class Collection
 	public:
 		collection_type type;
 		bool isSorted;
+		bool isCorrect;
 		Collection(collection_type);
 		Collection(string &);
 		Element * _getElementPtr(string &, unsigned int &, unsigned int);
@@ -94,9 +95,18 @@ Collection::Collection(string & line)
 	// line - collection line, type determined automatically
 	type = REGULAR;
 	isSorted = true;
+	isCorrect = true;
 	unsigned int start = 1;
 	while (start < line.length()-1)
 		pushElement(_getElementPtr(line, start, line.length()-1));
+	// «exception catching» xD
+	if (line != asString())
+	{
+		cerr << "What the hell did you enered, dude?" << endl;
+		cerr << " Got:           " << line << endl;
+		cerr << " But parsed as: " << asString() << endl;
+		isCorrect = false;
+	}
 }
 
 Element * Collection::_getElementPtr(string & line, unsigned int & start, unsigned int end)
@@ -164,6 +174,9 @@ Element * Collection::_getElementPtr(string & line, unsigned int & start, unsign
 			collection->pushElement(_getElementPtr(line, start, i));
 		element->setValue(collection);
 		start = i+2; // finish element to comma after it
+	} else
+	{
+		start = end; // go away with your stupid input
 	}
 	return element;
 }
@@ -358,6 +371,11 @@ int main()
 		{
 			t = t.substr(pos+1);
 			Collection * collection = new Collection(t);
+			if (!collection->isCorrect)
+			{
+				cout << "Incorrect input, so terminating" << endl;
+				return 0;
+			}
 			collections.push_back(collection);
 		}
 	}
