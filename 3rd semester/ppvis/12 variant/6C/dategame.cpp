@@ -1,8 +1,6 @@
 #include <fstream>
 #include <iostream>
 
-#define s 100
-
 using namespace std;
 
 bool isCorrect(int day, int month, int *dates)
