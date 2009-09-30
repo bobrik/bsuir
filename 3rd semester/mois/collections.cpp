@@ -70,7 +70,7 @@ class Collection
 		int size();
 		void sort();
 		string asString();
-		bool hasElement(string);
+		bool hasElement(string &);
 	friend class Operations;
 };
 
@@ -256,7 +256,6 @@ bool Collection::hasElement(string & element)
 {
 	// Checks element presence in collection
 	// element - string representation to search for
-	// TODO: gettin' string & as arg
 	vector<Element>::iterator i;
 	for (i = elements.begin(); i < elements.end(); ++i)
 		if (i->asString() == element)
@@ -324,6 +323,8 @@ Collection * Operations::symDifference(Collection * left, Collection * right)
 	// in A but not in B plus not in A but in B
 	// may be realized as two operations like A/B plus B/A
 	// but who freakin' cares?
+	left->sort();
+	right->sort();
 	vector<string> elements;
 	vector<string>::iterator j;
 	string result = "{";
