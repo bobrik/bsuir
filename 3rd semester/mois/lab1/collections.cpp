@@ -21,7 +21,6 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 */
 
-// TODO: обработка некорректного ввода
 
 #include <iostream>
 #include <fstream>
@@ -32,7 +31,11 @@ Boston, MA 02111-1307, USA.
 
 using namespace std;
 
+// Brace types
+enum brace_type {ORIENTED_OPEN = '<', ORIENTED_CLOSE = '>', REGULAR_OPEN = '{', REGULAR_CLOSE = '}'};
+// Collection type: oriented or regular
 enum collection_type {ORIENTED, REGULAR};
+// Element type: single or collection
 enum element_type {SINGLE, COLLECTION};
 
 class Collection;
@@ -42,35 +45,42 @@ class Operations;
 class Element
 {
 	private:
+		// element type
+		element_type _type;
 	public:
-		element_type type;
+		// single element value
 		string value;
+		// collection element value
 		Collection * collection;
 		Element(element_type);
+		const element_type type() const;
 		void setValue(string &);
 		void setValue(Collection *);
-		string asString() const;
+		string toString() const;
 		bool operator<(const Element &) const;
-		bool compare(const Element &, const Element &);
 };
 
 class Collection
 {
 	private:
+		// vector for collection elements
 		vector<Element> elements;
+		// collection type
+		collection_type _type;
+		Element * _getElementPtr(string &, unsigned int &, unsigned int);
+		bool _checkBalance(string &);
 	public:
-		collection_type type;
 		bool isSorted;
 		bool isCorrect;
 		Collection(collection_type);
 		Collection(string &);
-		Element * _getElementPtr(string &, unsigned int &, unsigned int);
+		const collection_type type() const;
 		void pushElement(Element *);
 		void show(int);
 		int size();
 		void sort();
-		string asString();
-		bool hasElement(string);
+		string toString();
+		bool hasElement(string &);
 	friend class Operations;
 };
 
@@ -85,7 +95,7 @@ Collection::Collection(collection_type t)
 {
 	// Collection constructor
 	// t - collection type
-	type = t;
+	_type = t;
 	isSorted = true;
 }
 
@@ -93,20 +103,66 @@ Collection::Collection(string & line)
 {
 	// Collection constructor
 	// line - collection line, type determined automatically
-	type = REGULAR;
+	_type = REGULAR;
 	isSorted = true;
 	isCorrect = true;
-	unsigned int start = 1;
-	while (start < line.length()-1)
-		pushElement(_getElementPtr(line, start, line.length()-1));
-	// «exception catching» xD
-	if (line != asString())
+	if (!_checkBalance(line))
 	{
-		cerr << "What the hell did you enered, dude?" << endl;
-		cerr << " Got:           " << line << endl;
-		cerr << " But parsed as: " << asString() << endl;
+		cerr << "Incorrect line (check braces balance): " << line << endl;
 		isCorrect = false;
+	} else
+	{
+		unsigned int start = 1;
+		while (start < line.length()-1)
+		{
+			Element * el = _getElementPtr(line, start, line.length()-1);
+			if (el != NULL)
+				pushElement(el);
+			else
+				break;
+		}
+		if (line != toString())
+		{
+			cerr << "What the hell did you enered, dude?" << endl;
+			cerr << " Got:           " << line << endl;
+			cerr << " But parsed as: " << toString() << endl;
+			isCorrect = false;
+		}
 	}
+}
+
+const collection_type Collection::type() const
+{
+	// returns collection type
+	return _type;
+}
+
+bool Collection::_checkBalance(string & line)
+{
+	stack<char> braces;
+	for (unsigned int i = 1; i < line.length()-1; ++i)
+	{
+		if (line[i] == REGULAR_OPEN)
+		{
+			braces.push(REGULAR_OPEN);
+		} else if (line[i] == REGULAR_CLOSE)
+		{
+			if (braces.empty() || (!braces.empty() && braces.top() != REGULAR_OPEN))
+				return false;
+			else
+				braces.pop();
+		} else if (line[i] == ORIENTED_OPEN)
+		{
+			braces.push(ORIENTED_OPEN);
+		} else if (line[i] == ORIENTED_CLOSE)
+		{
+			if (braces.empty() || (!braces.empty() && braces.top() != ORIENTED_OPEN))
+				return false;
+			else
+				braces.pop();
+		}
+	}
+	return braces.empty();
 }
 
 Element * Collection::_getElementPtr(string & line, unsigned int & start, unsigned int end)
@@ -114,15 +170,14 @@ Element * Collection::_getElementPtr(string & line, unsigned int & start, unsign
 	// Gets element pointer
 	// start & end - line positons to get next element
 	Collection * collection;
-	if (line[start] == '{')
+	if (line[start] == REGULAR_OPEN)
 	{
 		collection = new Collection(REGULAR);
-	} else if (line[start] == '<')
+	} else if (line[start] == ORIENTED_OPEN)
 	{
 		collection = new Collection(ORIENTED);
 	}
-
-	Element * element;
+	Element * element = NULL;
 	if ((line[start] >= '0' && line[start] <= '9') || (line[start] >= 'A' && line[start] <= 'z'))
 	{
 		string child;
@@ -134,15 +189,15 @@ Element * Collection::_getElementPtr(string & line, unsigned int & start, unsign
 		++start; // finish element to comma after it
 		element = new Element(SINGLE);
 		element->setValue(child);
-	} else if (line[start] == '<')
+	} else if (line[start] == ORIENTED_OPEN)
 	{
 		unsigned int i = start;
 		int braces = 0;
-		while (line[i] != '>' || braces != 1)
+		while (line[i] != ORIENTED_CLOSE || braces != 1)
 		{
-			if (line[i] == '<')
+			if (line[i] == ORIENTED_OPEN)
 				++braces;
-			else if (line[i] == '>')
+			else if (line[i] == ORIENTED_CLOSE)
 				--braces;
 			++i;
 		}
@@ -154,15 +209,15 @@ Element * Collection::_getElementPtr(string & line, unsigned int & start, unsign
 			collection->pushElement(_getElementPtr(line, start, i));
 		element->setValue(collection);
 		start = i+2; // finish element to comma after it
-	} else if (line[start] == '{')
+	} else if (line[start] == REGULAR_OPEN)
 	{
 		unsigned int i = start;
 		int braces = 0;
-		while (line[i] != '}' || braces != 1)
+		while (line[i] != REGULAR_CLOSE || braces != 1)
 		{
-			if (line[i] == '{')
+			if (line[i] == REGULAR_OPEN)
 				++braces;
-			else if (line[i] == '}')
+			else if (line[i] == REGULAR_CLOSE)
 				--braces;
 			++i;
 		}
@@ -198,12 +253,15 @@ void Collection::show(int deep = 0)
 	{
 		for (int d = 0; d <= deep; ++d)
 			cout << " ";
-		if (i->type == SINGLE)
+		if (i->type() == SINGLE)
 		{
 			cout << "Single: " << i->value << endl;
 		} else
 		{
-			cout << "Collection (" << (i->collection->type == REGULAR ? "regular" : "oriented") << ", " << (i->collection->isSorted ? "sorted" : "unsorted") << "): " << endl;
+			cout << "Collection (" <<
+				(i->collection->type() == REGULAR ? "regular" : "oriented") <<
+				", " << (i->collection->isSorted ? "sorted" : "unsorted") <<
+				"): " << endl;
 			i->collection->show(deep+1);
 		}
 	}
@@ -220,7 +278,7 @@ void Collection::sort()
 	// Sorts collection lexicographically
 	if (isSorted)
 		return;
-	if (type == REGULAR)
+	if (type() == REGULAR)
 	{
 		std::sort(elements.begin(), elements.end());
 	} else
@@ -228,27 +286,27 @@ void Collection::sort()
 		// sort recursively if oriented collection
 		vector<Element>::iterator i;
 		for (i = elements.begin(); i < elements.end(); ++i)
-			if (i->type == COLLECTION)
+			if (i->type() == COLLECTION)
 				i->collection->sort();
 	}
 	isSorted = true;
 }
 
-string Collection::asString()
+string Collection::toString()
 {
 	// Returns collection representation as string
 	string collection = "";
 	vector<Element>::iterator i;
 	for (i = elements.begin(); i != elements.end(); ++i)
 	{
-		collection += i->asString();
+		collection += i->toString();
 		if (i+1 != elements.end())
-			collection += ",";
+			collection += ',';
 	}
-	if (type == REGULAR)
-		collection = "{" + collection + "}";
+	if (type() == REGULAR)
+		collection = (char) REGULAR_OPEN + collection + (char) REGULAR_CLOSE;
 	else
-		collection = "<" + collection + ">";
+		collection = (char) ORIENTED_OPEN + collection + (char) ORIENTED_CLOSE;
 	return collection;
 }
 
@@ -256,10 +314,9 @@ bool Collection::hasElement(string & element)
 {
 	// Checks element presence in collection
 	// element - string representation to search for
-	// TODO: gettin' string & as arg
 	vector<Element>::iterator i;
 	for (i = elements.begin(); i < elements.end(); ++i)
-		if (i->asString() == element)
+		if (i->toString() == element)
 			return true;
 	return false;
 }
@@ -269,7 +326,7 @@ Element::Element(element_type t)
 {
 	// Element constructor
 	// t - element type
-	type = t;
+	_type = t;
 	value = "";
 	collection = NULL;
 }
@@ -285,32 +342,38 @@ void Element::setValue(Collection * col)
 {
 	// Sets element value for collection
 	// col - pointer to target collection
-	collection = new Collection(col->type);
+	collection = new Collection(col->type());
 	*collection = *col;
 }
 
-string Element::asString() const
+const element_type Element::type() const
+{
+	// returns element type
+	return _type;
+}
+
+string Element::toString() const
 {
 	// Returns element representation as string
-	if (type == SINGLE)
+	if (type() == SINGLE)
 		return value;
 	else
-		return collection->asString();
+		return collection->toString();
 }
 
 bool Element::operator<(const Element & el) const
 {
 	// Operator to check is element less than another
 	// el - link to rvalue
-	if (type == COLLECTION)
+	if (type() == COLLECTION)
 		collection->sort();
-	if (el.type == COLLECTION)
+	if (el.type() == COLLECTION)
 		el.collection->sort();
-	if (type == SINGLE && el.type == SINGLE)
+	if (type() == SINGLE && el.type() == SINGLE)
 		return value < el.value;
-	else if (type == COLLECTION && el.type == COLLECTION)
-		return asString() < el.asString();
-	else if (type == SINGLE && el.type == COLLECTION)
+	else if (type() == COLLECTION && el.type() == COLLECTION)
+		return toString() < el.toString();
+	else if (type() == SINGLE && el.type() == COLLECTION)
 		return true;
 	else
 		return false;
@@ -324,21 +387,23 @@ Collection * Operations::symDifference(Collection * left, Collection * right)
 	// in A but not in B plus not in A but in B
 	// may be realized as two operations like A/B plus B/A
 	// but who freakin' cares?
+	left->sort();
+	right->sort();
 	vector<string> elements;
 	vector<string>::iterator j;
-	string result = "{";
+	string result;
 	vector<Element>::iterator i;
-	string t = ""; // temp for asString resolving
+	string t = ""; // temp for toString resolving
 	for(i = left->elements.begin(); i < left->elements.end(); ++i)
 	{
-		t = i->asString();
+		t = i->toString();
 		if (!right->hasElement(t))
 			elements.push_back(t);
 	}
 	bool already = false;
 	for(i = right->elements.begin(); i < right->elements.end(); ++i)
 	{
-		t = i->asString();
+		t = i->toString();
 		if (!left->hasElement(t))
 		{
 			for (j = elements.begin(); j < elements.end(); ++j)
@@ -351,10 +416,12 @@ Collection * Operations::symDifference(Collection * left, Collection * right)
 				elements.push_back(t);
 		}
 	}
+	result = (char) REGULAR_OPEN;
 	for (j = elements.begin(); j < elements.end(); ++j)
-		result += *j + ",";
-	result = result.substr(0, result.length()-1);
-	result += "}";
+		result += *j + ',';
+	if (result.length() != 1) // if not {}
+		result = result.substr(0, result.length()-1);
+	result += REGULAR_CLOSE;
 	Collection * collection = new Collection(result);
 	return collection;
 }
@@ -394,6 +461,6 @@ int main()
 		result = psycho->symDifference(result, collections.back());
 		collections.pop_back();
 	}
-	cout << "Result: " << result->asString() << endl;
+	cout << "Result: " << result->toString() << endl;
 	return 0;
 }
