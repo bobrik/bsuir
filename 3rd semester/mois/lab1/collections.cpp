@@ -53,6 +53,7 @@ class Element
 		// collection element value
 		Collection * collection;
 		Element(element_type);
+		~Element();
 		const element_type type() const;
 		void setValue(string &);
 		void setValue(Collection *);
@@ -74,6 +75,7 @@ class Collection
 		bool isCorrect;
 		Collection(collection_type);
 		Collection(string &);
+		~Collection();
 		const collection_type type() const;
 		void pushElement(Element *);
 		void show(int);
@@ -129,6 +131,14 @@ Collection::Collection(string & line)
 			isCorrect = false;
 		}
 	}
+}
+
+Collection::~Collection()
+{
+	// TODO: fix memleaks
+	vector<Element>::iterator i;
+	for (i = elements.begin(); i < elements.end(); ++i)
+		elements.erase(i);
 }
 
 const collection_type Collection::type() const
@@ -331,6 +341,12 @@ Element::Element(element_type t)
 	collection = NULL;
 }
 
+Element::~Element()
+{
+	if (_type == COLLECTION)
+		delete collection;;
+}
+
 void Element::setValue(string & val)
 {
 	// Sets element value for single element
@@ -429,37 +445,24 @@ Collection * Operations::symDifference(Collection * left, Collection * right)
 int main()
 {
 	ifstream in("collections.in");
-	string t;
-	vector<Collection *> collections;
-	while (getline(in, t))
+	string collectionExpression;
+	Operations * psycho = new Operations;
+	Collection * result = new Collection(REGULAR);
+	while (getline(in, collectionExpression))
 	{
-		unsigned int pos = t.find("=");
+		unsigned int pos = collectionExpression.find("=");
 		if (pos != string::npos)
 		{
-			t = t.substr(pos+1);
-			Collection * collection = new Collection(t);
+			collectionExpression = collectionExpression.substr(pos+1);
+			Collection * collection = new Collection(collectionExpression);
 			if (!collection->isCorrect)
 			{
 				cout << "Incorrect input, so terminating" << endl;
 				return 0;
 			}
-			collections.push_back(collection);
+			result = psycho->symDifference(result, collection);
+			delete collection;
 		}
-	}
-	Operations * psycho = new Operations;
-	Collection * result;
-	if (collections.size() == 0)
-	{
-		result = new Collection(REGULAR);
-	} else
-	{
-		 result = collections.back();
-		 collections.pop_back();
-	}
-	while (!collections.empty())
-	{
-		result = psycho->symDifference(result, collections.back());
-		collections.pop_back();
 	}
 	cout << "Result: " << result->toString() << endl;
 	return 0;
