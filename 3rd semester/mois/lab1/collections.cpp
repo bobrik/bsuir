@@ -136,9 +136,9 @@ Collection::Collection(string & line)
 Collection::~Collection()
 {
 	// TODO: fix memleaks
-	vector<Element>::iterator i;
-	for (i = elements.begin(); i < elements.end(); ++i)
-		elements.erase(i);
+// 	vector<Element>::iterator i;
+// 	for (i = elements.begin(); i < elements.end(); ++i)
+// 		elements.erase(i);
 }
 
 const collection_type Collection::type() const
@@ -343,8 +343,8 @@ Element::Element(element_type t)
 
 Element::~Element()
 {
-	if (_type == COLLECTION)
-		delete collection;;
+// 	if (_type == COLLECTION)
+// 		delete collection;;
 }
 
 void Element::setValue(string & val)
