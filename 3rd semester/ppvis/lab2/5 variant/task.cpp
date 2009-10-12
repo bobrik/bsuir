@@ -5,14 +5,15 @@ using namespace std;
 class Rectangle
 {
 	private:
-		void _swap(int *, int *);
-	public:
+		void _swap(int &, int &);
 		int x1, x2, y1, y2;
+	public:
 		Rectangle(int, int, int, int);
 		void setSize(int, int, int, int);
 		void move(int, int);
 		Rectangle * minFromTwo(Rectangle *);
 		Rectangle * intersection(Rectangle *);
+		friend ostream & operator<<(ostream & stream, Rectangle &);
 };
 
 Rectangle::Rectangle(int _x1, int _y1, int _x2, int _y2)
@@ -20,31 +21,29 @@ Rectangle::Rectangle(int _x1, int _y1, int _x2, int _y2)
 	setSize(_x1, _y1, _x2, _y2);
 }
 
-void Rectangle::_swap(int * l, int * r)
+void Rectangle::_swap(int & l, int & r)
 {
-	int t = *l;
+	int t = l;
 	l = r;
-	*r = t;
+	r = t;
 }
 
 void Rectangle::setSize(int _x1, int _y1, int _x2, int _y2)
 {
-	if (x2 < x1)
-	{
-		int t = x2;
-		x2 = x1;
-		x1 = t;
-	}
-	if (y2 < y1)
-	{
-		int t = y2;
-		y2 = y1;
-		y1 = t;
-	}
+	if (_x2 < _x1)
+		swap(_x1, _x2);
+	if (_y2 < _y1)
+		swap(_y1, _y2);
 	x1 = _x1;
 	y1 = _y1;
 	x2 = _x2;
 	y2 = _y2;
+}
+
+ostream & operator<<(ostream & stream, Rectangle & rect)
+{
+	stream << rect.x1 << ' ' << rect.y1 << ' ' << rect.x2 << ' '<< rect.y2;
+	return stream;
 }
 
 void Rectangle::move(int _x, int _y)
@@ -54,6 +53,7 @@ void Rectangle::move(int _x, int _y)
 
 Rectangle * Rectangle::intersection(Rectangle * right)
 {
+	// Magic happens here
 	Rectangle * trueLeft = this;
 	Rectangle * trueRight = right;
 	Rectangle * trueTop = this;
@@ -122,7 +122,7 @@ Rectangle * Rectangle::minFromTwo(Rectangle * right)
 int main()
 {
 	Rectangle * one;
-	Rectangle * two = new Rectangle(0,0,4,4);
+	Rectangle * two;
 	Rectangle * three;
 
 	int x1, y1, x2, y2;
@@ -142,14 +142,14 @@ int main()
 		{
 			three = one->intersection(two);
 			if (NULL != three)
-				cout << "Cooordinates x1 y1 x2 y2: " << three->x1 << " " << three->y1 << " " << three->x2 << " " << three->y2 << endl;
+				cout << "Cooordinates x1 y1 x2 y2: " << *three << endl;
 			else
 				cout << "Sorry, there's no intersection" << endl;
 			delete three;
 		} else if (command == '2')
 		{
 			three = one->minFromTwo(two);
-			cout << "Coordinates: x1 y1 x2 y2: " << three->x1 << " " << three->y1 << " " << three->x2 << " " << three->y2 << endl;
+			cout << "Coordinates: x1 y1 x2 y2: " << *three << endl;
 			delete three;
 		} else if (command == '3' || command == '4')
 		{
@@ -169,8 +169,8 @@ int main()
 				two->move(x1, y1);
 		} else if (command == '7')
 		{
-			cout << "First: " << one->x1 << " " << one->y1 << " " << one->x2 << " " << one->y2 << endl;
-			cout << "Second: " << two->x1 << " " << two->y1 << " " << two->x2 << " " << two->y2 << endl;
+			cout << "First: " << *one << endl;
+			cout << "Second: " << *two << endl;
 		} else
 		{
 			cout << "Lol, what? Noone cares about that kind of troubles" << endl;
