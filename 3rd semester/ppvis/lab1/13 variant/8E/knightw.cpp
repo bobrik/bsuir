@@ -118,7 +118,7 @@ int main()
 
 	while (!cells->empty())
 		cells->pop();
-	delete cells;
+	//delete cells;
 
 	ofstream out("knightw.out");
 	if (table[finish.i][finish.j] == FINISH)
