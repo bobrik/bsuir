@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 
 using namespace std;
@@ -84,6 +83,8 @@ int main()
 		readRect(&r[i], in);
 	}
 	
+	in.close();
+	
 	int xcount = 0, ycount = 0;
 	int x[200], y[200];
 	
@@ -101,10 +102,6 @@ int main()
 	sort(y, ycount);
 	killDups(y, &ycount);
 	
-	for (int i = 0; i < xcount; ++i)
-		cout << x[i] << endl;
-	cout << endl;
-	
 	unsigned int area = 0;
 	bool painted;
 	for (int i = 0; i < xcount-1; ++i)
@@ -121,7 +118,11 @@ int main()
 				area += (x[i+1]-x[i])*(y[j+1]-y[j]);
 		}
 	
-	cout << area << endl;
+	ofstream out("rectarea.out");
+	
+	out << area << endl;
+	
+	out.close();
 	
 	return 0;
 }
