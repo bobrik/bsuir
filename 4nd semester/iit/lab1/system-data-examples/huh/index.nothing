@@ -1,0 +1,35 @@
+Список поддерживаемых тегов:
+
+@link{link}
+
+@hightlight{highlight}
+
+@big_heading{big_heading}
+
+@medium_heading{medium_heading}
+
+@regular_heading{regular_heading}
+
+@image{up.png} - image
+
+@bold{bold}
+
+@italic{italic}
+
+@strike{strike}
+
+@subscript{subscript}
+
+@superscript{superscript}
+
+@underline{underline}
+
+@polina{polina}
+
+@ololo{ololo}
+
+@irony{irony}
+
+Каждый тег начинается с собачки, затем имя тега и в фигурных скобках контент
+Для картинок контент - имя картинки.
+Вложенные теги не поддерживаются
