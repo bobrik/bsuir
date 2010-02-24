@@ -358,7 +358,7 @@ public class HyperNothingGUI extends javax.swing.JFrame {
 	} else if (tagName.equals("regular_heading")) {
 	    StyleConstants.setFontSize(attr, 20);
 	} else if (tagName.equals("image")) {
-	    StyleConstants.setIcon(attr, new ImageIcon(directory + '/' + tagContents));
+	    StyleConstants.setIcon(attr, new ImageIcon(directory + File.separator + tagContents));
 	} else if (tagName.equals("bold")) {
 	    StyleConstants.setBold(attr, true);
 	} else if (tagName.equals("italic")) {
