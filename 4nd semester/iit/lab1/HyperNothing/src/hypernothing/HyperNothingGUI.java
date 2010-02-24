@@ -24,7 +24,7 @@ import java.util.*;
  */
 public class HyperNothingGUI extends javax.swing.JFrame {
 
-    private String directory = "/home/gentoo/Desktop/HyperNothing/";
+    private String directory;
     private String extension = ".nothing";
     private Object linkStyle = StyleConstants.Background;
     private Color  linkStyleValue = Color.red;
@@ -272,7 +272,7 @@ public class HyperNothingGUI extends javax.swing.JFrame {
     private String openFile(String name) throws java.io.IOException {
 	StringBuffer fileData = new StringBuffer(1000);
 	BufferedReader reader = new BufferedReader(new FileReader(directory
-		+ '/' + name + extension));
+		+ File.separator + name + extension));
 	char[] buf = new char[1024];
 	int numRead = 0;
 	while ((numRead = reader.read(buf)) != -1) {
