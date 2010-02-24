@@ -27,7 +27,7 @@ public class HyperNothingGUI extends javax.swing.JFrame {
     private String directory = "/home/gentoo/Desktop/HyperNothing/";
     private String extension = ".nothing";
     private Object linkStyle = StyleConstants.Background;
-    private Color linkStyleValue = Color.red;
+    private Color  linkStyleValue = Color.red;
     private AbstractDocument doc;
 
     /** Creates new form HyperNothingGUI */
@@ -348,7 +348,7 @@ public class HyperNothingGUI extends javax.swing.JFrame {
 	SimpleAttributeSet attr = new SimpleAttributeSet();
 
 	if (tagName.equals("link")) {
-	    StyleConstants.setBackground(attr, Color.red);
+	    StyleConstants.setBackground(attr, linkStyleValue);
 	} else if (tagName.equals("highlight")) {
 	    StyleConstants.setBackground(attr, Color.yellow);
 	} else if (tagName.equals("big_heading")) {

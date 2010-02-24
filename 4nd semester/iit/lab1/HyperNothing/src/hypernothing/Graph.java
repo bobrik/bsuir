@@ -32,7 +32,7 @@ public class Graph
 	    return 0;
 	}
 
-	Vector nodeWeights = new Vector();
+	Vector<Integer> nodeWeights = new Vector<Integer>();
 	for (int i = 0; i < nodes.size(); ++i)
 	{
 	    nodeWeights.addElement(0);
@@ -47,7 +47,7 @@ public class Graph
 	return new Integer(nodeWeights.elementAt(nodes.indexOf(end)).toString());
     }
 
-    private void _maxDistanceHelper(Stack currentPath, Vector nodeWeights, Object end)
+    private void _maxDistanceHelper(Stack currentPath, Vector<Integer> nodeWeights, Object end)
     {
 	Object currentNode = currentPath.peek();
 	for (int i = 0; i < ((Vector) nodeConnections.get(currentNode)).size(); ++i)
@@ -55,7 +55,7 @@ public class Graph
 	    Object nodeConnection = ((Vector) nodeConnections.get(currentNode)).elementAt(i);
 	    if (!currentPath.contains(nodeConnection))
 	    {
-		if (new Integer(nodeWeights.elementAt(nodes.indexOf(nodeConnection)).toString()) < currentPath.size())
+		if (nodeWeights.elementAt(nodes.indexOf(nodeConnection)) < currentPath.size())
 		{
 		    nodeWeights.setElementAt(currentPath.size(), nodes.indexOf(nodeConnection));
 
