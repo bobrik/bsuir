@@ -66,8 +66,8 @@ public class HyperNothingGUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("HyperNothing");
+        setMinimumSize(new java.awt.Dimension(620, 350));
         setName("hyperNothingFrame"); // NOI18N
-        setResizable(false);
 
         verticesLabel.setText("Vertices:");
 
@@ -116,7 +116,7 @@ public class HyperNothingGUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(scrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 595, Short.MAX_VALUE)
+                    .addComponent(scrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 596, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(changeLocationButton, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -145,10 +145,10 @@ public class HyperNothingGUI extends javax.swing.JFrame {
                             .addComponent(calculateMaxPathButton))
                         .addGap(12, 12, 12))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(12, 12, 12)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 291, Short.MAX_VALUE)
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -289,17 +289,56 @@ public class HyperNothingGUI extends javax.swing.JFrame {
 	    this.doc.remove(0, doc.getLength());
 	} catch (javax.swing.text.BadLocationException e) {
 	}
-
+	
 	try {
 	    String raw = this.openFile(name);
+
+	    SimpleAttributeSet paragraphAttrs = new SimpleAttributeSet();
 
 	    int position = 0;
 
 	    while (position < raw.length()) {
 		int noTagContentsStartPosition = position;
+		boolean alignWasDeclared = false;
 		while (position < raw.length()) {
-		    if (raw.charAt(position) == '@') {
+		    if (raw.charAt(position) == '@')
+		    {
 			break;
+		    }
+		    if (!alignWasDeclared)
+		    {
+			if (raw.charAt(position) == '>')
+			{
+			    alignWasDeclared = true;
+			    StyleConstants.setAlignment(paragraphAttrs, StyleConstants.ALIGN_RIGHT);
+			} else if (raw.charAt(position) == '|')
+			{
+			    alignWasDeclared = true;
+			    StyleConstants.setAlignment(paragraphAttrs, StyleConstants.ALIGN_JUSTIFIED);
+			} else if (raw.charAt(position) == '^')
+			{
+			    alignWasDeclared = true;
+			    StyleConstants.setAlignment(paragraphAttrs, StyleConstants.ALIGN_CENTER);
+			} else if (raw.charAt(position) == '<')
+			{
+			    alignWasDeclared = true;
+			    StyleConstants.setAlignment(paragraphAttrs, StyleConstants.ALIGN_LEFT);
+			}
+
+			if (alignWasDeclared)
+			{
+			    try
+			    {
+				doc.insertString(doc.getLength(), raw.substring(noTagContentsStartPosition, position), null);
+			    } catch (javax.swing.text.BadLocationException e) {}
+
+			    textPane.setParagraphAttributes(paragraphAttrs, true);
+
+			    noTagContentsStartPosition = position+1;
+			}
+		    } else
+		    {
+			alignWasDeclared = false;
 		    }
 		    ++position;
 		}
@@ -342,6 +381,8 @@ public class HyperNothingGUI extends javax.swing.JFrame {
 	} catch (java.io.IOException e) {
 	    JOptionPane.showMessageDialog(this, "Probably broken link: " + name);
 	}
+
+	textPane.setCaretPosition(0);
     }
 
     private void insertTag(String tagName, String tagContents) {
@@ -349,14 +390,36 @@ public class HyperNothingGUI extends javax.swing.JFrame {
 
 	if (tagName.equals("link")) {
 	    StyleConstants.setBackground(attr, linkStyleValue);
-	} else if (tagName.equals("highlight")) {
-	    StyleConstants.setBackground(attr, Color.yellow);
+	} else if (tagName.startsWith("highlight")) {
+	    // 9 == length of 'color' string
+	    if (tagName.indexOf("_") == 9)
+	    {
+		String colorName = tagName.substring(10);
+		Color color;
+		if (colorName.equals("pink"))
+		{
+		    color = Color.pink;
+		} else if (colorName.equals("yellow"))
+		{
+		    color = Color.yellow;
+		} else if (colorName.equals("blue"))
+		{
+		    color = Color.blue;
+		} else if (colorName.equals("green"))
+		{
+		    color = Color.green;
+		} else
+		{
+		    color = Color.white;
+		}
+		StyleConstants.setBackground(attr, color);
+	    }
 	} else if (tagName.equals("big_heading")) {
 	    StyleConstants.setFontSize(attr, 24);
 	} else if (tagName.equals("medium_heading")) {
 	    StyleConstants.setFontSize(attr, 22);
 	} else if (tagName.equals("regular_heading")) {
-	    StyleConstants.setFontSize(attr, 20);
+	    StyleConstants.setFontSize(attr, 16);
 	} else if (tagName.equals("image")) {
 	    StyleConstants.setIcon(attr, new ImageIcon(directory + File.separator + tagContents));
 	} else if (tagName.equals("bold")) {
@@ -379,12 +442,47 @@ public class HyperNothingGUI extends javax.swing.JFrame {
 	} else if (tagName.equals("irony")) {
 	    StyleConstants.setForeground(attr, Color.gray);
 	    StyleConstants.setItalic(attr, true);
+	} else if (tagName.startsWith("color"))	{
+	    // 5 == length of 'color' string
+	    if (tagName.indexOf("_") == 5)
+	    {
+		String colorName = tagName.substring(6);
+		Color color;
+		if (colorName.equals("red"))
+		{
+		    color = Color.red;
+		} else if (colorName.equals("yellow"))
+		{
+		    color = Color.yellow;
+		} else if (colorName.equals("blue"))
+		{
+		    color = Color.blue;
+		} else if (colorName.equals("green"))
+		{
+		    color = Color.green;
+		} else
+		{
+		    color = Color.black;
+		}
+		StyleConstants.setForeground(attr, color);
+	    }
+	} else if (tagName.equals("CAPSLOCK"))
+	{
+	    tagContents = tagContents.toUpperCase();
+	} else if (tagName.startsWith("fontfamily"))
+	{
+	    if (tagName.indexOf("_") == 10)
+	    {
+		String fontFamilyName = tagName.substring(11).replace("_", " ");
+		StyleConstants.setFontFamily(attr, fontFamilyName);
+	    }
 	}
+
+	
 
 	try {
 	    doc.insertString(doc.getLength(), tagContents, attr);
-	} catch (javax.swing.text.BadLocationException e) {
-	}
+	} catch (javax.swing.text.BadLocationException e) {}
     }
 
     /**
