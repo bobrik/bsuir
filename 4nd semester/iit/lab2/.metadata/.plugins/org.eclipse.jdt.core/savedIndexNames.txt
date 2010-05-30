@@ -1,0 +1,1 @@
+INDEX VERSION 1.126+/home/gentoo/Учёба/git/4nd semester/iit/lab1/.metadata/.plugins/org.eclipse.jdt.core

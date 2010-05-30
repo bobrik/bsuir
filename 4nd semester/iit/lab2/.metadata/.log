@@ -1,0 +1,19 @@
+!SESSION 2010-05-13 08:06:44.776 -----------------------------------------------
+eclipse.buildId=M20090917-0800
+java.version=1.6.0_20
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=linux, ARCH=x86, WS=gtk, NL=ru_RU
+Framework arguments:  -product org.eclipse.epp.package.php.product
+Command-line arguments:  -data /home/gentoo/Учёба/git/4nd semester/iit/lab1 -os linux -ws gtk -arch x86 -product org.eclipse.epp.package.php.product
+
+!ENTRY org.eclipse.jdt.ui 2 0 2010-05-13 08:08:31.496
+!MESSAGE The 'org.eclipse.jdt.ui.JavadocHTMLCompletionProposalComputer_all' proposal computer from the 'org.eclipse.jdt.ui' plug-in did not complete normally. The extension violated the API contract of the 'computeCompletionProposals()' operation.
+
+!ENTRY org.eclipse.jdt.ui 2 0 2010-05-13 08:08:34.333
+!MESSAGE The 'org.eclipse.jdt.ui.JavadocHTMLCompletionProposalComputer_all' proposal computer from the 'org.eclipse.jdt.ui' plug-in did not complete normally. The extension violated the API contract of the 'computeCompletionProposals()' operation.
+
+!ENTRY org.eclipse.jdt.ui 2 0 2010-05-13 08:08:55.127
+!MESSAGE The 'org.eclipse.jdt.ui.JavadocHTMLCompletionProposalComputer_all' proposal computer from the 'org.eclipse.jdt.ui' plug-in did not complete normally. The extension violated the API contract of the 'computeCompletionProposals()' operation.
+
+!ENTRY org.eclipse.jdt.ui 2 0 2010-05-13 08:08:58.392
+!MESSAGE The 'org.eclipse.jdt.ui.JavadocHTMLCompletionProposalComputer_all' proposal computer from the 'org.eclipse.jdt.ui' plug-in did not complete normally. The extension violated the API contract of the 'computeCompletionProposals()' operation.
